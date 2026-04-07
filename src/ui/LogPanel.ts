@@ -72,6 +72,14 @@ export class LogPanel extends ItemView {
 		// Log container
 		this.createLogContainer(containerEl);
 
+		// Initial refresh - load existing logs
+		this.refreshLogs();
+
+		// Auto-refresh every 500ms to show new logs
+		this.registerInterval(window.setInterval(() => {
+			this.refreshLogs();
+		}, 500));
+
 		return Promise.resolve();
 	}
 

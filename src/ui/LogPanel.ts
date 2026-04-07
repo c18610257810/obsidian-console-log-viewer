@@ -1,5 +1,7 @@
 import { ItemView, WorkspaceLeaf, Setting, ButtonComponent } from 'obsidian';
 import ConsoleLogViewerPlugin from '../main';
+import { LogEntry } from '../core/types';
+import { LogItem } from './LogItem';
 
 export const VIEW_TYPE_CONSOLE_LOG = 'console-log-viewer';
 
@@ -9,6 +11,8 @@ export class LogPanel extends ItemView {
 	private filterButtons: Map<string, ButtonComponent> = new Map();
 	private currentFilter: string = 'all';
 	private searchQuery: string = '';
+	private logItems: Map<string, LogItem> = new Map();
+	private selectedLog: LogEntry | null = null;
 
 	constructor(leaf: WorkspaceLeaf, plugin: ConsoleLogViewerPlugin) {
 		super(leaf);
@@ -128,10 +132,11 @@ export class LogPanel extends ItemView {
 
 		// Update button states
 		this.filterButtons.forEach((btn, key) => {
+			const buttonEl = btn.buttonEl;
 			if (key === type) {
-				btn.setClass('active');
+				buttonEl.addClass('active');
 			} else {
-				btn.removeClass('active');
+				buttonEl.removeClass('active');
 			}
 		});
 
@@ -141,7 +146,9 @@ export class LogPanel extends ItemView {
 	private refreshLogs(): void {
 		if (!this.logContainerEl) return;
 
-		// Clear existing logs
+		// Clear existing log items
+		this.logItems.forEach(item => item.destroy());
+		this.logItems.clear();
 		this.logContainerEl.empty();
 
 		// Get logs from console hook
@@ -150,7 +157,7 @@ export class LogPanel extends ItemView {
 		// Filter logs
 		const filteredLogs = logs.filter(log => {
 			// Type filter
-			if (this.currentFilter !== 'all' && log.type !== this.currentFilter) {
+			if (this.currentFilter !== 'all' && log.level !== this.currentFilter) {
 				return false;
 			}
 
@@ -162,36 +169,39 @@ export class LogPanel extends ItemView {
 			return true;
 		});
 
+		// Reverse logs to show newest first
+		const reversedLogs = [...filteredLogs].reverse();
+
 		// Display filtered logs
-		if (filteredLogs.length === 0) {
-			this.logContainerEl.createDiv({ 
+		if (reversedLogs.length === 0) {
+			this.logContainerEl.createDiv({
 				cls: 'console-log-empty',
 				text: 'No logs to display'
 			});
 		} else {
-			filteredLogs.forEach(log => {
-				this.createLogEntry(log);
+			reversedLogs.forEach(log => {
+				const logItem = new LogItem(log, {
+					showTimestamp: this.plugin.settings.showTimestamp,
+					onClick: (clickedLog) => {
+						this.handleLogClick(clickedLog);
+					}
+				});
+				logItem.render(this.logContainerEl);
+				this.logItems.set(log.id, logItem);
 			});
+		}
+
+		// Auto-scroll to bottom (newest logs)
+		if (this.logContainerEl.scrollHeight > this.logContainerEl.clientHeight) {
+			this.logContainerEl.scrollTop = this.logContainerEl.scrollHeight;
 		}
 	}
 
-	private createLogEntry(log: any): void {
-		const logEl = this.logContainerEl.createDiv({ 
-			cls: `console-log-entry console-log-${log.type}` 
-		});
+	private handleLogClick(log: LogEntry): void {
+		// Store selected log for potential detail view
+		this.selectedLog = log;
 
-		// Timestamp
-		if (this.plugin.settings.showTimestamp) {
-			const timeEl = logEl.createDiv({ cls: 'console-log-time' });
-			timeEl.textContent = new Date(log.timestamp).toLocaleTimeString();
-		}
-
-		// Type badge
-		const typeEl = logEl.createDiv({ cls: 'console-log-type' });
-		typeEl.textContent = log.type.toUpperCase();
-
-		// Message
-		const messageEl = logEl.createDiv({ cls: 'console-log-message' });
-		messageEl.textContent = log.message;
+		// Could open a modal with full details in the future
+		console.log('Log clicked:', log.id);
 	}
 }

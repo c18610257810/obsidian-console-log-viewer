@@ -90,6 +90,8 @@
     flex-direction: column;
     gap: 4px;
     background-color: var(--background-primary);
+    cursor: pointer;
+    transition: background-color 0.2s ease;
 }
 
 .console-log-entry:hover {
@@ -110,9 +112,18 @@
     background-color: rgba(255, 0, 0, 0.1);
 }
 
+/* Log Icon */
+.console-log-icon {
+    font-size: 1.1em;
+    margin-right: 6px;
+    display: inline-block;
+}
+
 .console-log-time {
     color: var(--text-muted);
     font-size: 0.85em;
+    font-family: var(--font-monospace);
+    opacity: 0.8;
 }
 
 .console-log-type {
@@ -124,4 +135,22 @@
 .console-log-message {
     word-break: break-word;
     white-space: pre-wrap;
+    line-height: 1.4;
+    margin-top: 4px;
+}
+
+/* Truncated message */
+.console-log-message.truncated {
+    cursor: pointer;
+    color: var(--text-muted);
+}
+
+.console-log-message.truncated:hover {
+    color: var(--text-normal);
+    text-decoration: underline;
+}
+
+/* Expanded message */
+.console-log-message:not(.truncated) {
+    color: var(--text-normal);
 }

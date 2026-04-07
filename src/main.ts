@@ -39,6 +39,13 @@ export default class ConsoleLogViewerPlugin extends Plugin {
 		// Hook console methods
 		this.consoleHook.hook();
 
+		// Generate test logs to verify the plugin is working
+		console.log('✅ Console Log Viewer plugin loaded successfully');
+		console.info('ℹ️ This is an info log');
+		console.warn('⚠️ This is a warning log');
+		console.error('❌ This is an error log');
+		console.log('📝 Test log with object:', { name: 'Console Log Viewer', version: '1.0.1' });
+
 		// Add ribbon icon
 		this.addRibbonIcon('terminal', 'Console Log Viewer', () => {
 			this.activateView();
@@ -65,8 +72,6 @@ export default class ConsoleLogViewerPlugin extends Plugin {
 
 		// Add settings tab
 		this.addSettingTab(new ConsoleLogViewerSettingTab(this.app, this));
-
-		console.log('Console Log Viewer plugin loaded');
 	}
 
 	onunload() {

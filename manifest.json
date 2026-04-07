@@ -1,0 +1,10 @@
+{
+  "id": "console-log-viewer",
+  "name": "Console Log Viewer",
+  "version": "1.0.0",
+  "minAppVersion": "0.15.0",
+  "description": "View console logs in Obsidian mobile",
+  "author": "Frank Zhang",
+  "authorUrl": "https://github.com/frankzhang",
+  "isDesktopOnly": false
+}

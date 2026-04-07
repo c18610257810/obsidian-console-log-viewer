@@ -1,0 +1,31 @@
+{
+  "name": "obsidian-console-log-viewer",
+  "version": "1.0.0",
+  "main": "main.js",
+  "scripts": {
+    "build": "node esbuild.config.mjs",
+    "dev": "node esbuild.config.mjs --watch",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
+  },
+  "keywords": [
+    "obsidian",
+    "plugin",
+    "console",
+    "log",
+    "debug"
+  ],
+  "author": "Frank Zhang",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/jest": "^29.5.0",
+    "@types/node": "^20.10.0",
+    "builtin-modules": "^3.3.0",
+    "esbuild": "^0.19.0",
+    "jest": "^29.7.0",
+    "obsidian": "latest",
+    "ts-jest": "^29.1.0",
+    "typescript": "^5.3.0"
+  }
+}

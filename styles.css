@@ -1,0 +1,80 @@
+/* Console Log Viewer Styles */
+
+.console-log-viewer {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.console-log-viewer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.console-log-viewer-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 10px;
+    font-family: var(--font-monospace);
+    font-size: var(--font-size-sm);
+}
+
+.console-log-entry {
+    padding: 4px 8px;
+    border-radius: 4px;
+    margin-bottom: 4px;
+    display: flex;
+    gap: 8px;
+}
+
+.console-log-entry:hover {
+    background-color: var(--background-modifier-hover);
+}
+
+.console-log-timestamp {
+    color: var(--text-muted);
+    font-size: 0.9em;
+}
+
+.console-log-type {
+    font-weight: 600;
+    min-width: 60px;
+}
+
+.console-log-type.log {
+    color: var(--text-normal);
+}
+
+.console-log-type.info {
+    color: var(--text-accent);
+}
+
+.console-log-type.warn {
+    color: var(--text-warning);
+}
+
+.console-log-type.error {
+    color: var(--text-error);
+}
+
+.console-log-type.debug {
+    color: var(--text-muted);
+}
+
+.console-log-message {
+    flex: 1;
+    word-break: break-word;
+}
+
+.console-log-controls {
+    display: flex;
+    gap: 8px;
+}
+
+.console-log-controls button {
+    padding: 4px 12px;
+    font-size: var(--font-size-sm);
+}

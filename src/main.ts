@@ -1,5 +1,6 @@
-import { App, Plugin, PluginSettingTab, Setting } from 'obsidian';
+import { App, Plugin, PluginSettingTab, Setting, WorkspaceLeaf } from 'obsidian';
 import { ConsoleHook } from './core/ConsoleHook';
+import { LogPanel, VIEW_TYPE_CONSOLE_LOG } from './ui/LogPanel';
 
 interface ConsoleLogViewerSettings {
 	maxLogs: number;
@@ -29,12 +30,18 @@ export default class ConsoleLogViewerPlugin extends Plugin {
 			}
 		});
 
+		// Register the console log view
+		this.registerView(
+			VIEW_TYPE_CONSOLE_LOG,
+			(leaf) => new LogPanel(leaf, this)
+		);
+
 		// Hook console methods
 		this.consoleHook.hook();
 
 		// Add ribbon icon
 		this.addRibbonIcon('terminal', 'Console Log Viewer', () => {
-			// Will open console log viewer view
+			this.activateView();
 		});
 
 		// Add command to open console log viewer
@@ -42,7 +49,7 @@ export default class ConsoleLogViewerPlugin extends Plugin {
 			id: 'open-console-log-viewer',
 			name: 'Open Console Log Viewer',
 			callback: () => {
-				// Will open console log viewer view
+				this.activateView();
 			}
 		});
 
@@ -74,6 +81,30 @@ export default class ConsoleLogViewerPlugin extends Plugin {
 
 	async saveSettings() {
 		await this.saveData(this.settings);
+	}
+
+	async activateView() {
+		const { workspace } = this.app;
+
+		let leaf: WorkspaceLeaf | null = null;
+		const leaves = workspace.getLeavesOfType(VIEW_TYPE_CONSOLE_LOG);
+
+		if (leaves.length > 0) {
+			// A leaf with our view already exists, use that
+			leaf = leaves[0];
+		} else {
+			// Our view could not be found in the workspace, create a new leaf
+			// in the right sidebar for it
+			leaf = workspace.getRightLeaf(false);
+			if (leaf) {
+				await leaf.setViewState({ type: VIEW_TYPE_CONSOLE_LOG, active: true });
+			}
+		}
+
+		// "Reveal" the leaf in case it is in a collapsed sidebar
+		if (leaf) {
+			workspace.revealLeaf(leaf);
+		}
 	}
 }
 

@@ -75,6 +75,24 @@ export class ConsoleHook {
 	}
 
 	/**
+	 * Add a manual log entry (useful for mobile where console might be disabled)
+	 * @param level Log level
+	 * @param message Log message
+	 * @param args Additional arguments
+	 */
+	addManualLog(level: LogLevel, message: string, args: any[] = []): void {
+		const entry: LogEntry = {
+			id: this.generateId(),
+			timestamp: new Date(),
+			level: level,
+			message: message,
+			args: args,
+			stackTrace: ''
+		};
+		this.addLog(entry);
+	}
+
+	/**
 	 * Clear all captured logs
 	 */
 	clearLogs(): void {

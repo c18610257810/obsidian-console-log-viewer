@@ -40,11 +40,18 @@ export default class ConsoleLogViewerPlugin extends Plugin {
 		this.consoleHook.hook();
 
 		// Generate test logs to verify the plugin is working
+		// Use both console and manual log addition (for mobile where console might be disabled)
 		console.log('✅ Console Log Viewer plugin loaded successfully');
 		console.info('ℹ️ This is an info log');
 		console.warn('⚠️ This is a warning log');
 		console.error('❌ This is an error log');
-		console.log('📝 Test log with object:', { name: 'Console Log Viewer', version: '1.0.1' });
+		
+		// Manually add logs in case console is disabled on mobile
+		this.consoleHook.addManualLog('info', '✅ Plugin loaded successfully (manual log)');
+		this.consoleHook.addManualLog('info', 'ℹ️ This is an info log (manual)');
+		this.consoleHook.addManualLog('warn', '⚠️ This is a warning log (manual)');
+		this.consoleHook.addManualLog('error', '❌ This is an error log (manual)');
+		this.consoleHook.addManualLog('info', '📝 Test log with object: {name: "Console Log Viewer", version: "1.0.3"}', [{name: 'Console Log Viewer', version: '1.0.3'}]);
 
 		// Add ribbon icon
 		this.addRibbonIcon('terminal', 'Console Log Viewer', () => {

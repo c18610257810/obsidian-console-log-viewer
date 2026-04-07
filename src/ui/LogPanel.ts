@@ -2,6 +2,7 @@ import { ItemView, WorkspaceLeaf, Setting, ButtonComponent } from 'obsidian';
 import ConsoleLogViewerPlugin from '../main';
 import { LogEntry } from '../core/types';
 import { LogItem } from './LogItem';
+import { LogDetail, copyLogsToClipboard, exportLogsAsText, exportLogsAsJSON } from './LogDetail';
 
 export const VIEW_TYPE_CONSOLE_LOG = 'console-log-viewer';
 
@@ -75,6 +76,30 @@ export class LogPanel extends ItemView {
 			.onClick(() => {
 				this.plugin.consoleHook.clearLogs();
 				this.refreshLogs();
+			});
+
+		// Copy all button
+		new ButtonComponent(toolbarEl)
+			.setIcon('clipboard')
+			.setTooltip('Copy all logs')
+			.onClick(() => {
+				this.handleCopyAll();
+			});
+
+		// Export text button
+		new ButtonComponent(toolbarEl)
+			.setIcon('document')
+			.setTooltip('Export as text')
+			.onClick(() => {
+				this.handleExportText();
+			});
+
+		// Export JSON button
+		new ButtonComponent(toolbarEl)
+			.setIcon('file-json')
+			.setTooltip('Export as JSON')
+			.onClick(() => {
+				this.handleExportJSON();
 			});
 
 		// Settings button
@@ -155,19 +180,7 @@ export class LogPanel extends ItemView {
 		const logs = this.plugin.consoleHook.getLogs();
 
 		// Filter logs
-		const filteredLogs = logs.filter(log => {
-			// Type filter
-			if (this.currentFilter !== 'all' && log.level !== this.currentFilter) {
-				return false;
-			}
-
-			// Search filter
-			if (this.searchQuery && !log.message.toLowerCase().includes(this.searchQuery)) {
-				return false;
-			}
-
-			return true;
-		});
+		const filteredLogs = this.filterLogs(logs);
 
 		// Reverse logs to show newest first
 		const reversedLogs = [...filteredLogs].reverse();
@@ -198,10 +211,74 @@ export class LogPanel extends ItemView {
 	}
 
 	private handleLogClick(log: LogEntry): void {
-		// Store selected log for potential detail view
+		// Store selected log
 		this.selectedLog = log;
 
-		// Could open a modal with full details in the future
-		console.log('Log clicked:', log.id);
+		// Open detail modal
+		const modal = new LogDetail(this.app, log);
+		modal.open();
+	}
+
+	/**
+	 * Copy all filtered logs to clipboard
+	 */
+	private async handleCopyAll(): Promise<void> {
+		const logs = this.plugin.consoleHook.getLogs();
+		const filteredLogs = this.filterLogs(logs);
+		
+		if (filteredLogs.length === 0) {
+			return;
+		}
+
+		await copyLogsToClipboard(filteredLogs);
+	}
+
+	/**
+	 * Export filtered logs as text file
+	 */
+	private handleExportText(): void {
+		const logs = this.plugin.consoleHook.getLogs();
+		const filteredLogs = this.filterLogs(logs);
+		
+		if (filteredLogs.length === 0) {
+			return;
+		}
+
+		const timestamp = new Date().toISOString().split('T')[0];
+		exportLogsAsText(filteredLogs, `console-logs-${timestamp}.txt`);
+	}
+
+	/**
+	 * Export filtered logs as JSON file
+	 */
+	private handleExportJSON(): void {
+		const logs = this.plugin.consoleHook.getLogs();
+		const filteredLogs = this.filterLogs(logs);
+		
+		if (filteredLogs.length === 0) {
+			return;
+		}
+
+		const timestamp = new Date().toISOString().split('T')[0];
+		exportLogsAsJSON(filteredLogs, `console-logs-${timestamp}.json`);
+	}
+
+	/**
+	 * Filter logs based on current filter and search query
+	 */
+	private filterLogs(logs: LogEntry[]): LogEntry[] {
+		return logs.filter(log => {
+			// Type filter
+			if (this.currentFilter !== 'all' && log.level !== this.currentFilter) {
+				return false;
+			}
+
+			// Search filter
+			if (this.searchQuery && !log.message.toLowerCase().includes(this.searchQuery)) {
+				return false;
+			}
+
+			return true;
+		});
 	}
 }

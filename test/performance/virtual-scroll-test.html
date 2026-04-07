@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Virtual Scroll Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        
+        .test-container {
+            width: 600px;
+            height: 400px;
+            border: 1px solid #ccc;
+            background: white;
+            overflow: hidden;
+        }
+        
+        .virtual-scroll-wrapper {
+            height: 100%;
+            overflow-y: auto;
+            position: relative;
+        }
+        
+        .virtual-scroll-content {
+            position: relative;
+        }
+        
+        .console-log-entry {
+            padding: 6px 8px;
+            border-radius: 4px;
+            margin-bottom: 4px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            background-color: #fff;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            border-left: 3px solid #007acc;
+        }
+        
+        .console-log-entry:hover {
+            background-color: #f0f0f0;
+        }
+        
+        .virtual-scroll-placeholder {
+            width: 100%;
+        }
+        
+        .controls {
+            margin: 20px 0;
+        }
+        
+        button {
+            margin: 5px;
+            padding: 8px 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Virtual Scroll Performance Test</h1>
+    
+    <div class="controls">
+        <button onclick="testLogs(100)">Test 100 logs</button>
+        <button onclick="testLogs(500)">Test 500 logs</button>
+        <button onclick="testLogs(1000)">Test 1000 logs</button>
+        <button onclick="testLogs(2000)">Test 2000 logs</button>
+    </div>
+    
+    <div class="test-container">
+        <div class="virtual-scroll-wrapper" id="scrollWrapper">
+            <div class="virtual-scroll-content" id="scrollContent"></div>
+        </div>
+    </div>
+    
+    <div id="results"></div>
+
+    <script>
+        const VIRTUAL_SCROLL_ITEM_HEIGHT = 40;
+        const VIRTUAL_SCROLL_BUFFER = 5;
+        
+        let currentLogs = [];
+        let scrollTop = 0;
+        let viewportHeight = 0;
+        let renderStartIndex = 0;
+        let renderEndIndex = 0;
+        
+        const scrollWrapper = document.getElementById('scrollWrapper');
+        const scrollContent = document.getElementById('scrollContent');
+        const resultsDiv = document.getElementById('results');
+        
+        // Set up scroll event listener
+        scrollWrapper.addEventListener('scroll', handleScroll);
+        
+        function generateTestLogs(count) {
+            const logs = [];
+            const levels = ['info', 'warn', 'error'];
+            
+            for (let i = 0; i < count; i++) {
+                const level = levels[i % levels.length];
+                const message = `Test log message ${i} with some random content to make it longer and more realistic for performance testing.`;
+                logs.push({
+                    id: `log-${i}`,
+                    timestamp: new Date(Date.now() - i * 1000),
+                    level: level,
+                    message: message,
+                    args: [message]
+                });
+            }
+            
+            return logs.reverse(); // Show newest first
+        }
+        
+        function testLogs(count) {
+            console.log(`Testing with ${count} logs...`);
+            const startTime = performance.now();
+            
+            currentLogs = generateTestLogs(count);
+            scrollTop = 0;
+            viewportHeight = scrollWrapper.clientHeight;
+            
+            const renderTime = renderVisibleItems();
+            const totalTime = performance.now() - startTime;
+            
+            resultsDiv.innerHTML = `
+                <h3>Results for ${count} logs:</h3>
+                <p>Render time: ${renderTime.toFixed(2)}ms</p>
+                <p>Total time: ${totalTime.toFixed(2)}ms</p>
+                <p>Memory usage: ${Math.round(performance.memory?.usedJSHeapSize / 1024 / 1024)} MB</p>
+            `;
+            
+            console.log(`Render time: ${renderTime.toFixed(2)}ms, Total time: ${totalTime.toFixed(2)}ms`);
+        }
+        
+        function handleScroll() {
+            scrollTop = scrollWrapper.scrollTop;
+            viewportHeight = scrollWrapper.clientHeight;
+            renderVisibleItems();
+        }
+        
+        function renderVisibleItems() {
+            if (currentLogs.length === 0) return 0;
+            
+            const startTime = performance.now();
+            
+            // Calculate which items should be visible
+            const totalHeight = currentLogs.length * VIRTUAL_SCROLL_ITEM_HEIGHT;
+            scrollContent.style.height = `${totalHeight}px`;
+            
+            // Calculate visible range with buffer
+            const startItem = Math.max(0, Math.floor(scrollTop / VIRTUAL_SCROLL_ITEM_HEIGHT) - VIRTUAL_SCROLL_BUFFER);
+            const endItem = Math.min(
+                currentLogs.length,
+                Math.ceil((scrollTop + viewportHeight) / VIRTUAL_SCROLL_ITEM_HEIGHT) + VIRTUAL_SCROLL_BUFFER
+            );
+            
+            // Clear current visible items
+            scrollContent.innerHTML = '';
+            
+            // Create placeholder at the top for non-visible items
+            const topPlaceholderHeight = startItem * VIRTUAL_SCROLL_ITEM_HEIGHT;
+            if (topPlaceholderHeight > 0) {
+                const topPlaceholder = document.createElement('div');
+                topPlaceholder.className = 'virtual-scroll-placeholder';
+                topPlaceholder.style.height = `${topPlaceholderHeight}px`;
+                scrollContent.appendChild(topPlaceholder);
+            }
+            
+            // Render visible items
+            for (let i = startItem; i < endItem && i < currentLogs.length; i++) {
+                const log = currentLogs[i];
+                const itemEl = createLogElement(log);
+                itemEl.style.position = 'absolute';
+                itemEl.style.top = `${topPlaceholderHeight + (i - startItem) * VIRTUAL_SCROLL_ITEM_HEIGHT}px`;
+                itemEl.style.width = '100%';
+                scrollContent.appendChild(itemEl);
+            }
+            
+            renderStartIndex = startItem;
+            renderEndIndex = endItem;
+            
+            return performance.now() - startTime;
+        }
+        
+        function createLogElement(log) {
+            const itemEl = document.createElement('div');
+            itemEl.className = `console-log-entry console-log-${log.level}`;
+            
+            // Add timestamp
+            const timeEl = document.createElement('div');
+            timeEl.className = 'console-log-time';
+            const hours = log.timestamp.getHours().toString().padStart(2, '0');
+            const minutes = log.timestamp.getMinutes().toString().padStart(2, '0');
+            const seconds = log.timestamp.getSeconds().toString().padStart(2, '0');
+            timeEl.textContent = `${hours}:${minutes}:${seconds}`;
+            itemEl.appendChild(timeEl);
+            
+            // Add level icon
+            const iconEl = document.createElement('div');
+            iconEl.className = 'console-log-icon';
+            const levelIcons = { info: '🟢', warn: '🟡', error: '🔴' };
+            iconEl.textContent = levelIcons[log.level] || '⚪';
+            itemEl.appendChild(iconEl);
+            
+            // Add message
+            const messageEl = document.createElement('div');
+            messageEl.className = 'console-log-message';
+            messageEl.textContent = log.message;
+            itemEl.appendChild(messageEl);
+            
+            return itemEl;
+        }
+        
+        // Initialize with 100 logs
+        testLogs(100);
+    </script>
+</body>
+</html>

@@ -69,10 +69,24 @@
 /* Log Container */
 .console-log-container {
     flex: 1;
-    overflow-y: auto;
     padding: 10px;
     font-family: var(--font-monospace);
     font-size: var(--font-size-sm);
+}
+
+/* Virtual Scroll Wrapper */
+.virtual-scroll-wrapper {
+    height: 100%;
+    overflow-y: auto;
+    position: relative;
+}
+
+.virtual-scroll-content {
+    position: relative;
+}
+
+.virtual-scroll-placeholder {
+    width: 100%;
 }
 
 .console-log-empty {

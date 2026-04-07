@@ -7,7 +7,7 @@ import { LogDetail, copyLogsToClipboard, exportLogsAsText, exportLogsAsJSON } fr
 export const VIEW_TYPE_CONSOLE_LOG = 'console-log-viewer';
 
 // Performance configuration
-const VIRTUAL_SCROLL_ITEM_HEIGHT = 40; // Estimated height of each log item
+const VIRTUAL_SCROLL_ITEM_HEIGHT = 56; // Increased height for mobile touch targets
 const VIRTUAL_SCROLL_BUFFER = 5; // Number of items to render above/below viewport
 const DEBOUNCE_DELAY = 150; // Search debounce delay in ms
 

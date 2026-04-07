@@ -27,10 +27,20 @@
     gap: 8px;
     padding: 8px 10px;
     border-bottom: 1px solid var(--background-modifier-border);
+    flex-wrap: wrap; /* Allow wrapping on mobile */
 }
 
 .console-log-toolbar button {
-    padding: 4px 8px;
+    padding: 8px 12px; /* Increased for better touch */
+    min-height: 36px; /* Minimum touch-friendly height */
+    border-radius: 6px;
+    transition: transform 0.1s ease, opacity 0.1s ease;
+}
+
+/* Touch feedback for toolbar buttons */
+.console-log-toolbar button:active {
+    transform: scale(0.95);
+    opacity: 0.8;
 }
 
 /* Filter */
@@ -39,12 +49,21 @@
     gap: 4px;
     padding: 8px 10px;
     border-bottom: 1px solid var(--background-modifier-border);
+    flex-wrap: wrap; /* Allow wrapping on mobile */
 }
 
 .console-log-filter button {
-    padding: 4px 12px;
+    padding: 8px 16px; /* Increased for touch */
     font-size: var(--font-size-sm);
     border-radius: 4px;
+    min-height: 36px; /* Touch-friendly height */
+    transition: transform 0.1s ease, opacity 0.1s ease;
+}
+
+/* Touch feedback for filter buttons */
+.console-log-filter button:active {
+    transform: scale(0.95);
+    opacity: 0.8;
 }
 
 .console-log-filter button.active {
@@ -97,19 +116,26 @@
 
 /* Log Entry Styles */
 .console-log-entry {
-    padding: 6px 8px;
-    border-radius: 4px;
-    margin-bottom: 4px;
+    padding: 10px 12px; /* Increased padding for touch */
+    border-radius: 6px; /* Larger radius for touch-friendly feel */
+    margin-bottom: 6px; /* Increased spacing */
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 6px; /* Increased gap */
     background-color: var(--background-primary);
     cursor: pointer;
-    transition: background-color 0.2s ease;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    min-height: 44px; /* Minimum touch target */
 }
 
 .console-log-entry:hover {
     background-color: var(--background-modifier-hover);
+}
+
+/* Touch feedback for log entries */
+.console-log-entry:active {
+    transform: scale(0.98);
+    background-color: var(--background-modifier-active-hover);
 }
 
 .console-log-entry.console-log-info {
@@ -172,6 +198,8 @@
 /* Detail Modal Styles */
 .console-log-detail-modal {
     padding: 20px;
+    max-width: 90vw; /* Limit width on mobile */
+    overflow-y: auto; /* Allow scrolling on small screens */
 }
 
 .console-log-detail-modal h2 {
@@ -198,7 +226,7 @@
     border-radius: 4px;
     white-space: pre-wrap;
     overflow-x: auto;
-    max-height: 300px;
+    max-height: 200px; /* Reduced for mobile */
     overflow-y: auto;
 }
 
@@ -210,7 +238,7 @@
     border-radius: 4px;
     white-space: pre-wrap;
     overflow-x: auto;
-    max-height: 400px;
+    max-height: 250px; /* Reduced for mobile */
     overflow-y: auto;
     color: var(--text-muted);
 }
@@ -221,10 +249,22 @@
     margin-top: 24px;
     padding-top: 16px;
     border-top: 1px solid var(--background-modifier-border);
+    flex-wrap: wrap; /* Allow wrapping */
 }
 
 .console-log-detail-buttons button {
     flex: 1;
+    min-width: 100px; /* Minimum width for buttons */
+    min-height: 44px; /* Touch-friendly height */
+    padding: 12px 16px; /* Larger padding */
+    border-radius: 6px;
+    transition: transform 0.1s ease, opacity 0.1s ease;
+}
+
+/* Touch feedback for modal buttons */
+.console-log-detail-buttons button:active {
+    transform: scale(0.95);
+    opacity: 0.8;
 }
 
 /* Toast notification */
@@ -239,6 +279,8 @@
     font-size: var(--font-size-sm);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
     animation: fade-in 0.3s ease;
+    max-width: 80vw; /* Limit width */
+    z-index: 1000; /* Ensure visibility */
 }
 
 .console-log-toast::after {
@@ -253,4 +295,205 @@
 @keyframes fade-out {
     from { opacity: 1; }
     to { opacity: 0; }
+}
+
+/* =====================================
+   MOBILE RESPONSIVE STYLES
+   ===================================== */
+
+/* Tablet and small screens (768px and below) */
+@media (max-width: 768px) {
+    /* Header - smaller title */
+    .console-log-header {
+        padding: 8px;
+    }
+
+    .console-log-header h2 {
+        font-size: 1em; /* Smaller title */
+    }
+
+    /* Toolbar - compact with wrapping */
+    .console-log-toolbar {
+        gap: 6px;
+        padding: 6px 8px;
+    }
+
+    .console-log-toolbar button {
+        padding: 10px 12px;
+        min-height: 44px; /* Apple HIG minimum touch target */
+        font-size: 14px; /* Larger font for readability */
+    }
+
+    /* Filter buttons - full-width row on mobile */
+    .console-log-filter {
+        gap: 6px;
+        padding: 6px 8px;
+        justify-content: space-between; /* Spread buttons */
+    }
+
+    .console-log-filter button {
+        flex: 1; /* Each button takes equal space */
+        min-width: 60px; /* Minimum width */
+        min-height: 44px; /* Touch-friendly */
+        padding: 10px 8px;
+        font-size: 14px; /* Larger font */
+    }
+
+    /* Search box */
+    .console-log-search {
+        padding: 6px 8px;
+    }
+
+    .console-log-search input[type="text"] {
+        min-height: 44px; /* Touch-friendly input */
+        font-size: 16px; /* Prevent iOS zoom */
+        padding: 10px 12px;
+    }
+
+    /* Log container */
+    .console-log-container {
+        padding: 8px;
+    }
+
+    /* Log entries - optimized for touch */
+    .console-log-entry {
+        padding: 12px 14px; /* Larger padding */
+        min-height: 56px; /* Larger touch target */
+        margin-bottom: 8px; /* More spacing */
+    }
+
+    /* Log message - larger font */
+    .console-log-message {
+        font-size: 15px; /* Larger for readability */
+        line-height: 1.5; /* Better readability */
+    }
+
+    .console-log-time {
+        font-size: 13px; /* Slightly larger */
+    }
+
+    .console-log-type {
+        font-size: 13px;
+    }
+
+    /* Detail Modal - mobile optimized */
+    .console-log-detail-modal {
+        padding: 16px;
+        max-width: 95vw;
+    }
+
+    .console-log-detail-modal h2 {
+        font-size: 1.2em; /* Smaller title */
+        margin-bottom: 16px;
+    }
+
+    .console-log-detail-modal .setting-item {
+        padding: 10px 0;
+    }
+
+    .console-log-detail-args,
+    .console-log-detail-stack {
+        padding: 10px;
+        max-height: 150px; /* Smaller to prevent overflow */
+        font-size: 13px;
+    }
+
+    /* Modal buttons - full width stacked */
+    .console-log-detail-buttons {
+        flex-direction: column; /* Stack vertically */
+        gap: 10px;
+    }
+
+    .console-log-detail-buttons button {
+        min-height: 48px; /* Larger touch target */
+        width: 100%; /* Full width */
+        font-size: 16px;
+    }
+
+    /* Toast - centered at bottom */
+    .console-log-toast {
+        bottom: 10px;
+        left: 10px;
+        right: 10px;
+        width: auto; /* Full width */
+        padding: 14px 16px;
+        text-align: center;
+        font-size: 15px;
+    }
+}
+
+/* Extra small screens (480px and below) */
+@media (max-width: 480px) {
+    /* Further compact header */
+    .console-log-header {
+        padding: 6px;
+    }
+
+    .console-log-header h2 {
+        font-size: 0.9em;
+    }
+
+    /* Toolbar - very compact */
+    .console-log-toolbar {
+        gap: 4px;
+        padding: 6px;
+    }
+
+    .console-log-toolbar button {
+        padding: 8px 10px;
+        min-height: 44px;
+    }
+
+    /* Filter - full width spread */
+    .console-log-filter button {
+        padding: 10px 4px;
+        font-size: 13px;
+    }
+
+    /* Log entries */
+    .console-log-entry {
+        padding: 10px 12px;
+        min-height: 48px;
+    }
+
+    .console-log-message {
+        font-size: 14px;
+    }
+
+    /* Hide icon on very small screens to save space */
+    .console-log-icon {
+        font-size: 1em;
+    }
+
+    /* Modal very compact */
+    .console-log-detail-modal {
+        padding: 12px;
+    }
+
+    .console-log-detail-modal h2 {
+        font-size: 1.1em;
+    }
+}
+
+/* Landscape orientation on mobile */
+@media (max-width: 768px) and (orientation: landscape) {
+    /* Toolbar can stay horizontal */
+    .console-log-toolbar {
+        flex-wrap: nowrap;
+    }
+
+    /* Filter can stay horizontal */
+    .console-log-filter {
+        flex-wrap: nowrap;
+    }
+
+    /* Modal buttons stay horizontal in landscape */
+    .console-log-detail-buttons {
+        flex-direction: row;
+    }
+
+    .console-log-detail-buttons button {
+        min-height: 44px;
+        flex: 1;
+    }
 }

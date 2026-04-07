@@ -17,11 +17,12 @@ export class ConsoleHook {
 	 */
 	constructor(config: ConsoleHookConfig = {}) {
 		// Store original console methods before hooking
+		// Check if console exists and has the required methods (might not exist on mobile)
 		this.originalConsole = {
-			log: console.log.bind(console),
-			info: console.info.bind(console),
-			warn: console.warn.bind(console),
-			error: console.error.bind(console)
+			log: (typeof console !== 'undefined' && typeof console.log === 'function') ? console.log.bind(console) : (() => {}),
+			info: (typeof console !== 'undefined' && typeof console.info === 'function') ? console.info.bind(console) : (() => {}),
+			warn: (typeof console !== 'undefined' && typeof console.warn === 'function') ? console.warn.bind(console) : (() => {}),
+			error: (typeof console !== 'undefined' && typeof console.error === 'function') ? console.error.bind(console) : (() => {})
 		};
 
 		// Set default configuration
@@ -31,6 +32,10 @@ export class ConsoleHook {
 			onLogCapture: config.onLogCapture ?? (() => {}),
 			passThrough: config.passThrough ?? true
 		};
+		
+		// Log whether console is available
+		const consoleAvailable = typeof console !== 'undefined' && typeof console.log === 'function';
+		console.log(`Console API available: ${consoleAvailable}`);
 	}
 
 	/**

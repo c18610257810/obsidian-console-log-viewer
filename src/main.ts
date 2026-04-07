@@ -39,19 +39,36 @@ export default class ConsoleLogViewerPlugin extends Plugin {
 		// Hook console methods
 		this.consoleHook.hook();
 
+		// Provide global logging API (works even if console is disabled on mobile)
+		// @ts-ignore
+		window.logViewer = {
+			log: (message: string, ...args: any[]) => {
+				this.consoleHook.addManualLog('info', message, args);
+			},
+			info: (message: string, ...args: any[]) => {
+				this.consoleHook.addManualLog('info', message, args);
+			},
+			warn: (message: string, ...args: any[]) => {
+				this.consoleHook.addManualLog('warn', message, args);
+			},
+			error: (message: string, ...args: any[]) => {
+				this.consoleHook.addManualLog('error', message, args);
+			},
+			clear: () => {
+				this.consoleHook.clearLogs();
+			},
+			getLogs: () => {
+				return this.consoleHook.getLogs();
+			}
+		};
+
 		// Generate test logs to verify the plugin is working
-		// Use both console and manual log addition (for mobile where console might be disabled)
-		console.log('✅ Console Log Viewer plugin loaded successfully');
-		console.info('ℹ️ This is an info log');
-		console.warn('⚠️ This is a warning log');
-		console.error('❌ This is an error log');
-		
-		// Manually add logs in case console is disabled on mobile
-		this.consoleHook.addManualLog('info', '✅ Plugin loaded successfully (manual log)');
-		this.consoleHook.addManualLog('info', 'ℹ️ This is an info log (manual)');
-		this.consoleHook.addManualLog('warn', '⚠️ This is a warning log (manual)');
-		this.consoleHook.addManualLog('error', '❌ This is an error log (manual)');
-		this.consoleHook.addManualLog('info', '📝 Test log with object: {name: "Console Log Viewer", version: "1.0.3"}', [{name: 'Console Log Viewer', version: '1.0.3'}]);
+		// Use manual log injection (works even if console is disabled)
+		this.consoleHook.addManualLog('info', '✅ Plugin loaded successfully');
+		this.consoleHook.addManualLog('info', 'ℹ️ This is an info log');
+		this.consoleHook.addManualLog('warn', '⚠️ This is a warning log');
+		this.consoleHook.addManualLog('error', '❌ This is an error log');
+		this.consoleHook.addManualLog('info', '📝 Usage: Call window.logViewer.log("your message") to add logs', [{example: 'window.logViewer.log("test")'}]);
 
 		// Add ribbon icon
 		this.addRibbonIcon('terminal', 'Console Log Viewer', () => {
@@ -84,6 +101,14 @@ export default class ConsoleLogViewerPlugin extends Plugin {
 	onunload() {
 		// Restore original console methods
 		this.consoleHook.restore();
+		
+		// Remove global API
+		// @ts-ignore
+		if (window.logViewer) {
+			// @ts-ignore
+			delete window.logViewer;
+		}
+		
 		console.log('Console Log Viewer plugin unloaded');
 	}
 
